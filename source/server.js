@@ -10,6 +10,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const semver = require('semver');
 const path = require('path');
 const fs = require('fs').promises;
+const fs2 = require('fs');
 const signals = require('signals');
 const os = require('os');
 const cache = require('./utils/cache');
@@ -294,6 +295,12 @@ app.get('/serverdata.js', (req, res) => {
     `ungit.pluginApiVersion = "${require('../package.json').ungitPluginApiVersion}";\n`;
   res.set('Content-Type', 'application/javascript');
   res.send(text);
+});
+
+app.get('/api/fileJSON', (req, res) => {
+  let file = fs2.readFileSync(path.resolve(req.query.repoPath, req.query.filename));
+  let result = JSON.parse(file);
+  res.json({ status: 'success', file: result });
 });
 
 app.get('/api/latestversion', (req, res) => {

@@ -65,16 +65,7 @@ function WindowTitle() {
   this.crash = false;
 }
 WindowTitle.prototype.update = function () {
-  var title = this.path
-    .replace(/\\/g, '/')
-    .split('/')
-    .filter(function (x) {
-      return x;
-    })
-    .reverse()
-    .join(' < ');
-  if (this.crash) title = ':( ungit crash ' + title;
-  document.title = title;
+  if (this.crash) document.title = ':( ungit crash ';
 };
 
 var windowTitle = new WindowTitle();
@@ -142,17 +133,17 @@ exports.start = function () {
   ko.applyBindings(appContainer);
 
   // routing
-  navigation.crossroads.addRoute('/', function () {
-    app.content(components.create('home', { app: app }));
-    windowTitle.path = 'ungit';
-    windowTitle.update();
-  });
+  // navigation.crossroads.addRoute('/', function () {
+  //   app.content(components.create('home', { app: app }));
+  //   windowTitle.path = 'ungit';
+  //   windowTitle.update();
+  // });
 
-  navigation.crossroads.addRoute('/repository{?query}', function (query) {
-    programEvents.dispatch({ event: 'navigated-to-path', path: query.path });
-    app.content(components.create('path', { server: server, path: query.path }));
-    windowTitle.path = query.path;
-    windowTitle.update();
+  navigation.crossroads.addRoute('{repo}', function (repo) {
+    console.log('zhopa', repo);
+    let path = '/home/smolovk/code/oschad-local-dev/fsm_src/' + repo;
+    programEvents.dispatch({ event: 'navigated-to-path', path: path });
+    app.content(components.create('path', { server: server, path: path }));
   });
 
   navigation.init();

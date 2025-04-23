@@ -7,6 +7,7 @@ const filesToDisplayIncrmentBy = 50;
 const filesToDisplayLimit = filesToDisplayIncrmentBy;
 const mergeTool = ungit.config.mergeTool;
 const { ComponentRoot } = require('../ComponentRoot');
+let repo;
 
 components.register(
   'staging',
@@ -17,6 +18,7 @@ class StagingViewModel extends ComponentRoot {
   constructor(server, repoPath, graph) {
     super();
     this.server = server;
+    repo = repoPath;
     this.repoPath = repoPath;
     this.refreshContent = _.debounce(this._refreshContent, 250, this.defaultDebounceOption);
     this.graph = graph;
@@ -118,6 +120,7 @@ class StagingViewModel extends ComponentRoot {
     this.stashIcon = octicons.pin.toSVG({ height: 15 });
     this.discardIcon = octicons.x.toSVG({ height: 18 });
     this.ignoreIcon = octicons.skip.toSVG({ height: 18 });
+    this.copyNodeIDIcon = octicons.file.toSVG({ height: 18 });
   }
 
   updateNode(parentElement) {
@@ -209,7 +212,24 @@ class StagingViewModel extends ComponentRoot {
     }
   }
 
-  setFiles(files) {
+  async parseDisplayName(name) {
+    if (name.startsWith('nodes')) {
+      let res = await this.server.getPromise(`/fileJSON/`, {
+        filename: name,
+        repoPath: this.repoPath(),
+      });
+      return `${res.file.namespace} | ${res.file.n_name}`;
+      // return `${res.file.n_name} - NS: ${res.file.namespace}`;
+    } else if (name.startsWith('namespaces')) {
+      let res = await this.server.getPromise(`/fileJSON/`, {
+        filename: name,
+        repoPath: this.repoPath(),
+      });
+      return `${res.file.name} [NS]`;
+    } else return name;
+  }
+
+  async setFiles(files) {
     const newFiles = [];
     for (const fileStatus of Object.values(files)) {
       let fileViewModel = this.filesByPath[fileStatus.fileName];
@@ -223,12 +243,15 @@ class StagingViewModel extends ComponentRoot {
       } else {
         // this is mainly for patching and it may not fire due to the fact that
         // '/commit' triggers working-tree-changed which triggers throttled refresh
-        fileViewModel.diff().invalidateDiff();
+        if (fileViewModel.diff()) fileViewModel.diff().invalidateDiff();
       }
+      let displayName = await this.parseDisplayName(fileStatus.displayName); //.then((displayName) => {
+      fileStatus.displayName = displayName;
       fileViewModel.setState(fileStatus);
       newFiles.push(fileViewModel);
     }
-    this.files(newFiles);
+
+    this.files(newFiles.sort((a, b) => a.displayName().localeCompare(b.displayName())));
   }
 
   toggleAmend() {
@@ -258,7 +281,7 @@ class StagingViewModel extends ComponentRoot {
     this.commitMessageBody('');
     for (const key in this.filesByPath) {
       const element = this.filesByPath[key];
-      element.diff().invalidateDiff();
+      element.diff()?.invalidateDiff();
       element.patchLineList.removeAll();
       element.isShowingDiffs(false);
       element.editState(element.editState() === 'patched' ? 'none' : element.editState());
@@ -350,7 +373,7 @@ class StagingViewModel extends ComponentRoot {
 
   invalidateFilesDiffs() {
     this.files().forEach((file) => {
-      file.diff().invalidateDiff();
+      file.diff()?.invalidateDiff();
     });
   }
 
@@ -442,6 +465,13 @@ class FileViewModel {
         this.isShowingDiffs()
     );
     this.mergeTool = ko.computed(() => this.conflict() && mergeTool !== false);
+    if (name.startsWith('nodes/')) {
+      this.isNode = ko.observable(true);
+      this.nodeID = ko.observable(name.replace('nodes/', '').replace('.json', ''));
+    } else {
+      this.isNode = ko.observable(false);
+      this.nodeID = ko.observable('');
+    }
 
     this.editState.subscribe((value) => {
       if (value === 'none') {
@@ -469,6 +499,7 @@ class FileViewModel {
   }
 
   setState(state) {
+    // state.displayName = this.parseDisplayName(state.displayName);
     this.displayName(state.displayName);
     this.isNew(state.isNew);
     this.removed(state.removed);
@@ -534,6 +565,10 @@ class FileViewModel {
           this.server.unhandledRejection(err);
         }
       });
+  }
+
+  copyNodeID() {
+    navigator.clipboard.writeText(this.nodeID());
   }
 
   resolveConflict() {
