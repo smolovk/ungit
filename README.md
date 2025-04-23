@@ -1,5 +1,7 @@
 ungit
 ======
+My fork of ungit to use as a component of other system
+======
 [![NPM version](https://badge.fury.io/js/ungit.svg)](https://badge.fury.io/js/ungit)
 [![CI](https://github.com/FredrikNoren/ungit/actions/workflows/ci.yml/badge.svg)](https://github.com/FredrikNoren/ungit/actions/workflows/ci.yml)
 [![Join the chat at https://gitter.im/FredrikNoren/ungit](https://badges.gitter.im/FredrikNoren/ungit.svg)](https://gitter.im/FredrikNoren/ungit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
