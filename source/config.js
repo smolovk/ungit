@@ -169,7 +169,8 @@ const defaultConfig = {
   // when false, disable numstats durin status for performance.  see #1193
   isEnableNumStat: true,
 
-  pathPrefix: '/home/smolovk/code/oschad-local-dev/fsm_src/'
+  // pathPrefix: '/home/smolovk/code/oschad-local-dev/fsm_src/'
+  repoPathPrefix: '/home/smolovk/code/megafsm.v3/FSM_SOURCES/',
 };
 
 // Works for now but should be moved to bin/ungit

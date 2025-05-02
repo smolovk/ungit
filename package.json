@@ -44,6 +44,7 @@
     "ignore": "~7.0.3",
     "jquery": "~3.7.1",
     "jquery-ui": "~1.14.1",
+    "jsonc-parser": "^3.3.1",
     "just-detect-adblock": "~1.1.0",
     "knockout": "~3.5.1",
     "latest-version": "~9.0.0",

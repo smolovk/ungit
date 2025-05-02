@@ -18,6 +18,11 @@ class CommitLineDiff {
     this.wordWrap = args.wordWrap;
     this.whiteSpace = args.whiteSpace;
     this.specificDiff = ko.observable(this.getSpecificDiff());
+    this.setDisplayName();
+  }
+
+  async setDisplayName() {
+    this.displayName(await this.parseDisplayName(this.displayName()));
   }
 
   getSpecificDiff() {
@@ -32,6 +37,23 @@ class CommitLineDiff {
       whiteSpace: this.whiteSpace,
       wordWrap: this.wordWrap,
     });
+  }
+
+  async parseDisplayName(name) {
+    if (name.startsWith('nodes')) {
+      let res = await this.server.getPromise(`/fileJSON/`, {
+        filename: name,
+        repoPath: this.repoPath(),
+      });
+      if (res.status == 'success') return `${res.file.namespace} | ${res.file.n_name}`;
+    } else if (name.startsWith('namespaces')) {
+      let res = await this.server.getPromise(`/fileJSON/`, {
+        filename: name,
+        repoPath: this.repoPath(),
+      });
+      if (res.status == 'success') return `${res.file.name} [NS]`;
+    } else return name;
+    return name;
   }
 
   fileNameClick() {

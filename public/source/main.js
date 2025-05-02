@@ -140,8 +140,7 @@ exports.start = function () {
   // });
 
   navigation.crossroads.addRoute('{repo}', function (repo) {
-    console.log('zhopa', repo);
-    let path = '/home/smolovk/code/oschad-local-dev/fsm_src/' + repo;
+    let path = ungit.config.repoPathPrefix + repo;
     programEvents.dispatch({ event: 'navigated-to-path', path: path });
     app.content(components.create('path', { server: server, path: path }));
   });

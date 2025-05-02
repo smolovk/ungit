@@ -121,6 +121,9 @@ class TextDiffViewModel {
                   --- a/${this.filename}
                   +++ b/${this.filename}`;
         }
+        // diffs = diffs
+        //   .replaceAll('\\n', '\n')
+        //   .replaceAll(/\\u([\dA-F]{4})/gi, (_, g1) => String.fromCharCode(parseInt(g1, 16)));
         this.diffJson = diff2html.parse(diffs);
       })
       .catch((err) => {

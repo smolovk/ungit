@@ -16,6 +16,7 @@ const os = require('os');
 const cache = require('./utils/cache');
 const UngitPlugin = require('./ungit-plugin');
 const serveStatic = require('serve-static');
+const { parse: jsoncParse } = require('jsonc-parser');
 
 process.on('uncaughtException', (err) => {
   logger.error(err.stack ? err.stack.toString() : err.toString());
@@ -298,9 +299,13 @@ app.get('/serverdata.js', (req, res) => {
 });
 
 app.get('/api/fileJSON', (req, res) => {
-  let file = fs2.readFileSync(path.resolve(req.query.repoPath, req.query.filename));
-  let result = JSON.parse(file);
-  res.json({ status: 'success', file: result });
+  try {
+    let file = fs2.readFileSync(path.resolve(req.query.repoPath, req.query.filename), 'utf8');
+    let result = jsoncParse(file);
+    res.json({ status: 'success', file: result });
+  } catch (e) {
+    res.json({ status: 'fail', e });
+  }
 });
 
 app.get('/api/latestversion', (req, res) => {

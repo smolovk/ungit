@@ -388,6 +388,7 @@ git.diffFile = (repoPath, filename, oldFilename, sha1, ignoreWhiteSpace) => {
           [
             'diff',
             ignoreWhiteSpace ? '-w' : '',
+            '--color-words',
             `${prevSha1}:${oldFilename.trim()}`,
             `${sha1}:${filename.trim()}`,
           ],
